@@ -168,6 +168,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const closePopupBtn = document.getElementById('close-popup');
     const trash = document.getElementById('trash');
 
+    // Wczytaj kafelki z localStorage przy załadowaniu strony
+    loadTilesFromLocalStorage();
+
     // Sortowanie elementów w strefie draggable
     Sortable.create(sortableContainer, {
         group: {
@@ -264,6 +267,26 @@ document.addEventListener("DOMContentLoaded", () => {
         sortableContainer.removeChild(tile);
         console.log('Kafelek usunięty do kosza');
     }
+
+    function saveTileToLocalStorage(id, iconUrl, name) {
+        let tiles = JSON.parse(localStorage.getItem('tiles')) || [];
+        tiles.push({ id, iconUrl, name });
+        localStorage.setItem('tiles', JSON.stringify(tiles));
+    }
+
+    function removeTileFromLocalStorage(id) {
+        let tiles = JSON.parse(localStorage.getItem('tiles')) || [];
+        tiles = tiles.filter(tile => tile.id !== id);
+        localStorage.setItem('tiles', JSON.stringify(tiles));
+    }
+
+    function loadTilesFromLocalStorage() {
+        let tiles = JSON.parse(localStorage.getItem('tiles')) || [];
+        tiles.forEach(tile => {
+            addTileToContainer(tile.iconUrl, tile.id, tile.name);
+        });
+    }
+    
 });
 </script>
 
