@@ -279,10 +279,8 @@ function removeTile(tile, id) {
     if (sortableContainer.contains(tile)) {
         sortableContainer.removeChild(tile);
         console.log(`Kafelek o id ${id} został usunięty z kontenera.`);
-    } else if (trash.contains(tile)) {
-        console.log(`Kafelek o id ${id} został usunięty z kosza.`);
+        removeTileFromLocalStorage(id); // Usuń kafelek z localStorage
     }
-    removeTileFromLocalStorage(id); // Usuń kafelek z localStorage
 }
 
 
