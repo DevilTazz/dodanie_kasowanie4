@@ -181,6 +181,8 @@ document.addEventListener("DOMContentLoaded", () => {
         animation: 150,
         onEnd: evt => {
             if (evt.from === trash) {
+                const id = evt.item.getAttribute('data-id');
+                removeTile(evt.item, id); // Usuń kafelek z kontenera
                 console.log('Kafelek usunięty do kosza');
             }
         }
@@ -190,7 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
     Sortable.create(trash, {
         group: "tiles",
         onAdd: function (evt) {
-            removeTile(evt.item, evt.item.getAttribute('data-id')); // Usunięcie kafelka
+            const id = evt.item.getAttribute('data-id');
+            removeTile(evt.item, id); // Usunięcie kafelka ze strefy docelowej
             console.log('Kafelek usunięty do kosza');
         }
     });
@@ -296,6 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 </script>
+
 
 </body>
 </html>
