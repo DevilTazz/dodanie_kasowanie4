@@ -188,13 +188,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Sortowanie w strefie droppable (kosz)
-    Sortable.create(trash, {
-        group: "tiles",
-        onAdd: function (evt) {
-            const id = evt.item.getAttribute('data-id');
-            removeTile(evt.item, id); // Usunięcie kafelka ze strefy docelowej
-        }
-    });
+   // Sortowanie w strefie droppable (kosz)
+Sortable.create(trash, {
+    group: "tiles",
+    onAdd: function (evt) {
+        const id = evt.item.getAttribute('data-id');
+        console.log(`Kafelek o id ${id} dodany do kosza.`);
+        removeTile(evt.item, id); // Usunięcie kafelka ze strefy docelowej
+    }
+});
 
     addTileBtn.addEventListener("click", function(event) {
         event.preventDefault();
@@ -248,35 +250,41 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         return tileItem;
     }
-
-    function addTileToContainer(iconUrl, name, id) {
-        // Sprawdź, czy kafelek o danym id już istnieje
-        if (sortableContainer.querySelector(`[data-id="${id}"]`)) {
-            console.log(`Kafelek o id ${id} już istnieje.`);
-            return; // Nie dodawaj, jeśli kafelek już istnieje
-        }
-
-        const newTile = document.createElement('div');
-        newTile.className = 'icon';
-        newTile.setAttribute('data-id', id); // Dodaj atrybut data-id
-        newTile.innerHTML = `
-            <img src="${iconUrl}" alt="${name}">
-            <span>${name}</span>
-            <button class="remove-btn">Usuń</button>
-        `;
-        newTile.querySelector('.remove-btn').addEventListener('click', event => {
-            event.stopPropagation();
-            removeTile(newTile, id); // Przekazujemy id do usunięcia
-        });
-        sortableContainer.appendChild(newTile);
-        saveTileToLocalStorage(id, iconUrl, name); // Zapisz kafelek do localStorage
+    
+function addTileToContainer(iconUrl, name, id) {
+    if (sortableContainer.querySelector(`[data-id="${id}"]`)) {
+        console.log(`Kafelek o id ${id} już istnieje.`);
+        return; // Nie dodawaj, jeśli kafelek już istnieje
     }
 
-    function removeTile(tile, id) {
+    const newTile = document.createElement('div');
+    newTile.className = 'icon';
+    newTile.setAttribute('data-id', id); // Dodaj atrybut data-id
+    newTile.innerHTML = `
+        <img src="${iconUrl}" alt="${name}">
+        <span>${name}</span>
+        <button class="remove-btn">Usuń</button>
+    `;
+    newTile.querySelector('.remove-btn').addEventListener('click', event => {
+        event.stopPropagation();
+        console.log(`Przycisk usuwania kafelka o id ${id} został kliknięty.`);
+        removeTile(newTile, id); // Przekazujemy id do usunięcia
+    });
+    sortableContainer.appendChild(newTile);
+    console.log(`Dodano kafelek: ${name} (id: ${id})`);
+    saveTileToLocalStorage(id, iconUrl, name); // Zapisz kafelek do localStorage
+}
+
+function removeTile(tile, id) {
+    if (sortableContainer.contains(tile)) {
         sortableContainer.removeChild(tile);
-        console.log('Kafelek usunięty do kosza');
-        removeTileFromLocalStorage(id); // Usuń kafelek z localStorage
+        console.log(`Kafelek o id ${id} został usunięty z kontenera.`);
+    } else if (trash.contains(tile)) {
+        console.log(`Kafelek o id ${id} został usunięty z kosza.`);
     }
+    removeTileFromLocalStorage(id); // Usuń kafelek z localStorage
+}
+
 
     function saveTileToLocalStorage(id, iconUrl, name) {
         let tiles = JSON.parse(localStorage.getItem('tiles')) || [];
@@ -296,6 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
             addTileToContainer(tile.iconUrl, tile.name, tile.id); // Przekazujemy id
         });
     }
+    console.log(JSON.parse(localStorage.getItem('tiles')));
 });
 </script>
 
