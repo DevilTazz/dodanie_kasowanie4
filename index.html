@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Sortable.create(trash, {
         group: "tiles",
         onAdd: function (evt) {
-            evt.item.remove(); // Usunięcie elementu ze strefy docelowej
+            removeTile(evt.item); // Usunięcie kafelka
             console.log('Kafelek usunięty do kosza');
         }
     });
@@ -215,7 +215,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function loadAvailableTiles() {
-        /* availableTiles.innerHTML = ''; */
         fetch('tiles.json') // Upewnij się, że plik tiles.json jest dostępny
             .then(response => {
                 if (!response.ok) {
@@ -242,13 +241,13 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
         tileItem.addEventListener('click', () => {
-            addTileToContainer(iconUrl, name);
+            addTileToContainer(iconUrl, name, id); // Przekazujemy id
             closePopup();
         });
         return tileItem;
     }
 
-    function addTileToContainer(iconUrl, name) {
+    function addTileToContainer(iconUrl, name, id) {
         const newTile = document.createElement('div');
         newTile.className = 'icon';
         newTile.innerHTML = `
@@ -258,14 +257,16 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         newTile.querySelector('.remove-btn').addEventListener('click', event => {
             event.stopPropagation();
-            removeTile(newTile);
+            removeTile(newTile, id); // Przekazujemy id do usunięcia
         });
         sortableContainer.appendChild(newTile);
+        saveTileToLocalStorage(id, iconUrl, name); // Zapisz kafelek do localStorage
     }
 
-    function removeTile(tile) {
+    function removeTile(tile, id) {
         sortableContainer.removeChild(tile);
         console.log('Kafelek usunięty do kosza');
+        removeTileFromLocalStorage(id); // Usuń kafelek z localStorage
     }
 
     function saveTileToLocalStorage(id, iconUrl, name) {
@@ -283,10 +284,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function loadTilesFromLocalStorage() {
         let tiles = JSON.parse(localStorage.getItem('tiles')) || [];
         tiles.forEach(tile => {
-            addTileToContainer(tile.iconUrl, tile.id, tile.name);
+            addTileToContainer(tile.iconUrl, tile.name, tile.id); // Przekazujemy id
         });
     }
-    
 });
 </script>
 
