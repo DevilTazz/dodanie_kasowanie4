@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
     Sortable.create(trash, {
         group: "tiles",
         onAdd: function (evt) {
-            removeTile(evt.item); // Usunięcie kafelka
+            removeTile(evt.item, evt.item.getAttribute('data-id')); // Usunięcie kafelka
             console.log('Kafelek usunięty do kosza');
         }
     });
@@ -248,8 +248,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function addTileToContainer(iconUrl, name, id) {
+        // Sprawdź, czy kafelek o danym id już istnieje
+        if (sortableContainer.querySelector(`[data-id="${id}"]`)) {
+            console.log(`Kafelek o id ${id} już istnieje.`);
+            return; // Nie dodawaj, jeśli kafelek już istnieje
+        }
+
         const newTile = document.createElement('div');
         newTile.className = 'icon';
+        newTile.setAttribute('data-id', id); // Dodaj atrybut data-id
         newTile.innerHTML = `
             <img src="${iconUrl}" alt="${name}">
             <span>${name}</span>
