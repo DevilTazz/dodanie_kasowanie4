@@ -183,18 +183,16 @@ document.addEventListener("DOMContentLoaded", () => {
             if (evt.from === trash) {
                 const id = evt.item.getAttribute('data-id');
                 removeTile(evt.item, id); // Usuń kafelek z kontenera
-                console.log('Kafelek usunięty do kosza');
             }
         }
     });
 
-    // Sortowanie w strefie droppable
+    // Sortowanie w strefie droppable (kosz)
     Sortable.create(trash, {
         group: "tiles",
         onAdd: function (evt) {
             const id = evt.item.getAttribute('data-id');
             removeTile(evt.item, id); // Usunięcie kafelka ze strefy docelowej
-            console.log('Kafelek usunięty do kosza');
         }
     });
 
@@ -226,6 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return response.json();
             })
             .then(data => {
+                availableTiles.innerHTML = ''; // Wyczyść dostępne kafelki przed dodaniem nowych
                 data.forEach(tile => {
                     availableTiles.appendChild(createTileForPopup(tile.iconUrl, tile.id, tile.name, tile.description));
                 });
@@ -299,6 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 </script>
+
 
 
 </body>
