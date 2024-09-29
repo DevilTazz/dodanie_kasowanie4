@@ -153,6 +153,8 @@
 
     <div id="trash"></div>
 
+     <button id="save-tiles">Zapisz do LocalStorage</button> <!-- Przycisk do zapisu -->
+
     <div id="tile-popup" class="popup">
         <h2>Dodaj kafelek</h2>
         <div id="available-tiles"></div>
@@ -167,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const availableTiles = document.getElementById('available-tiles');
     const closePopupBtn = document.getElementById('close-popup');
     const trash = document.getElementById('trash');
+    const saveTilesBtn = document.getElementById('save-tiles');
 
     // Wczytaj kafelki z localStorage przy załadowaniu strony
     loadTilesFromLocalStorage();
@@ -181,22 +184,20 @@ document.addEventListener("DOMContentLoaded", () => {
         animation: 150,
         onEnd: evt => {
             if (evt.from === trash) {
-                const id = evt.item.getAttribute('data-id');
-                removeTile(evt.item, id); // Usuń kafelek z kontenera
+                console.log('Kafelek usunięty do kosza');
             }
         }
     });
 
+    
     // Sortowanie w strefie droppable (kosz)
-   // Sortowanie w strefie droppable (kosz)
-Sortable.create(trash, {
-    group: "tiles",
-    onAdd: function (evt) {
-        const id = evt.item.getAttribute('data-id');
-        console.log(`Kafelek o id ${id} dodany do kosza.`);
-        removeTile(evt.item, id); // Usunięcie kafelka ze strefy docelowej
-    }
-});
+    Sortable.create(trash, {
+        group: "tiles",
+        onAdd: function (evt) {
+            removeTile(evt.item); // Usunięcie kafelka
+            console.log('Kafelek usunięty do kosza');
+        }
+    });
 
     addTileBtn.addEventListener("click", function(event) {
         event.preventDefault();
@@ -217,16 +218,17 @@ Sortable.create(trash, {
         }
     });
 
+        // Zapisz kafelki do LocalStorage
+    saveTilesBtn.addEventListener('click', () => {
+        saveTilesToLocalStorage();
+        console.log('Kafelki zapisane do LocalStorage');
+    });
+
     function loadAvailableTiles() {
-        fetch('tiles.json') // Upewnij się, że plik tiles.json jest dostępny
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
+        fetch('tiles.json')
+            .then(response => response.json())
             .then(data => {
-                availableTiles.innerHTML = ''; // Wyczyść dostępne kafelki przed dodaniem nowych
+                availableTiles.innerHTML = '';
                 data.forEach(tile => {
                     availableTiles.appendChild(createTileForPopup(tile.iconUrl, tile.id, tile.name, tile.description));
                 });
@@ -251,6 +253,7 @@ Sortable.create(trash, {
         return tileItem;
     }
     
+// Dodanie kafelka do kontenera
 function addTileToContainer(iconUrl, name, id) {
     if (sortableContainer.querySelector(`[data-id="${id}"]`)) {
         console.log(`Kafelek o id ${id} już istnieje.`);
@@ -272,37 +275,41 @@ function addTileToContainer(iconUrl, name, id) {
     });
     sortableContainer.appendChild(newTile);
     console.log(`Dodano kafelek: ${name} (id: ${id})`);
-    saveTileToLocalStorage(id, iconUrl, name); // Zapisz kafelek do localStorage
+
 }
 
-function removeTile(tile, id) {
-    if (sortableContainer.contains(tile)) {
-        sortableContainer.removeChild(tile);
-        console.log(`Kafelek o id ${id} został usunięty z kontenera.`);
-        removeTileFromLocalStorage(id); // Usuń kafelek z localStorage
-    }
-}
-
-
-    function saveTileToLocalStorage(id, iconUrl, name) {
-        let tiles = JSON.parse(localStorage.getItem('tiles')) || [];
-        tiles.push({ id, iconUrl, name });
-        localStorage.setItem('tiles', JSON.stringify(tiles));
+   // Funkcja zapisująca wszystkie kafelki do LocalStorage
+    function saveTilesToLocalStorage() {
+        const tiles = Array.from(sortableContainer.querySelectorAll('.icon'));
+        const tileData = tiles.map(tile => ({
+            id: tile.dataset.id,
+            iconUrl: tile.querySelector('img').src,
+            name: tile.querySelector('span').textContent
+        }));
+        localStorage.setItem('tiles', JSON.stringify(tileData));
     }
 
-    function removeTileFromLocalStorage(id) {
-        let tiles = JSON.parse(localStorage.getItem('tiles')) || [];
-        tiles = tiles.filter(tile => tile.id !== id);
-        localStorage.setItem('tiles', JSON.stringify(tiles));
+    // Funkcja usuwająca kafelek i aktualizująca LocalStorage
+    function removeTile(tileElement, id) {
+        tileElement.remove(); // Usuń kafelek z interfejsu
+
+        // Usuń kafelek z LocalStorage
+        let savedTiles = JSON.parse(localStorage.getItem('tiles')) || [];
+        savedTiles = savedTiles.filter(tile => tile.id !== id); // Usuń kafelek o podanym id
+        localStorage.setItem('tiles', JSON.stringify(savedTiles));
+
+        console.log(`Kafelek o id ${id} został usunięty.`);
     }
 
+    // Funkcja ładująca kafelki z LocalStorage
     function loadTilesFromLocalStorage() {
-        let tiles = JSON.parse(localStorage.getItem('tiles')) || [];
-        tiles.forEach(tile => {
-            addTileToContainer(tile.iconUrl, tile.name, tile.id); // Przekazujemy id
-        });
+        const savedTiles = JSON.parse(localStorage.getItem('tiles'));
+        if (savedTiles) {
+            savedTiles.forEach(tile => {
+                addTileToContainer(tile.iconUrl, tile.name, tile.id);
+            });
+        }
     }
-    console.log(JSON.parse(localStorage.getItem('tiles')));
 });
 </script>
 
