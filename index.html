@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function loadAvailableTiles() {
-        availableTiles.innerHTML = '';
+        /* availableTiles.innerHTML = ''; */
         fetch('tiles.json') // Upewnij się, że plik tiles.json jest dostępny
             .then(response => {
                 if (!response.ok) {
