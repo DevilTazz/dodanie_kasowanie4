@@ -167,23 +167,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const availableTiles = document.getElementById('available-tiles');
     const closePopupBtn = document.getElementById('close-popup');
     const trash = document.getElementById('trash');
-    let isOverTrashBin = false;
 
-    // Inicjalizacja Sortable dla kafelków
-    new Sortable(sortableContainer, {
-        animation: 150,
-        group: 'tiles',
-        handle: '.icon',
-        onEnd: evt => {
-            if (isOverTrashBin) {
-                removeTile(evt.item);
-                isOverTrashBin = false;
-                trash.classList.remove('highlight-trash');
-            }
+    // Sortowanie elementów w strefie draggable
+    Sortable.create(sortableContainer, {
+        group: {
+            name: "tiles",
+            pull: true,
+            put: true // Umożliwia dodawanie do kontenera
         },
-        onMove: evt => {
-            isOverTrashBin = isOverTrash(evt.dragged.getBoundingClientRect(), trash.getBoundingClientRect());
-            trash.classList.toggle('highlight-trash', isOverTrashBin);
+        animation: 150,
+        onEnd: evt => {
+            if (evt.from === trash) {
+                console.log('Kafelek usunięty do kosza');
+            }
+        }
+    });
+
+    // Sortowanie w strefie droppable
+    Sortable.create(trash, {
+        group: "tiles",
+        onAdd: function (evt) {
+            evt.item.remove(); // Usunięcie elementu ze strefy docelowej
+            console.log('Kafelek usunięty do kosza');
         }
     });
 
@@ -258,17 +263,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function removeTile(tile) {
         sortableContainer.removeChild(tile);
         console.log('Kafelek usunięty do kosza');
-    }
-
-    // Funkcja sprawdzająca, czy element jest nad koszem
-    function isOverTrash(squareRect, trashRect) {
-        const margin = 10; // Ustal margines
-        return (
-            squareRect.left < trashRect.right &&
-            squareRect.right > trashRect.left &&
-            squareRect.top < trashRect.bottom + margin &&
-            squareRect.bottom > trashRect.top - margin
-        );
     }
 });
 </script>
